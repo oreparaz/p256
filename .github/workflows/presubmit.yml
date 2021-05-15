@@ -1,0 +1,28 @@
+name: Presubmit Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 0'  # Weekly
+
+jobs:
+  linux-gcc:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [32, 64]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: sudo apt-get install gcc-multilib g++-multilib && P256_LINUXARCH=${{ matrix.architecture }} make -j
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: make -j
+
