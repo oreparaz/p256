@@ -1,5 +1,6 @@
 SRCS := p256.c \
 		tests/test_openssl.cc \
+		tests/test_nist.cc \
 		tests/unittest_main.cc
 
 BUILD_DIR := build
