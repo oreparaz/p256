@@ -6,7 +6,7 @@ using byte_vec_t = std::vector< unsigned char >;
 // Tests taken from NIST
 // https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/digital-signatures
 // publication FIPS 186-4
-TEST_CASE("Couple test vectors from OpenSSL", "[p256_verify]") {
+TEST_CASE("Test vectors from NIST tests/test_nist.cc", "[p256_verify]") {
   
   SECTION("Negative test 0") {
     byte_vec_t msg {
