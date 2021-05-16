@@ -40,6 +40,11 @@ Pornin's BearSSL. BearSSL copyright is reproduced below. I also got
 inspiration from the series of embedded libraries by the inimitable
 [Charles Nicholson](https://github.com/charlesnicholson).
 
+The following people have contributed to `p256` through code, bug
+reports, issues or ideas:
+
+* Arthur De Belen
+
 ## Developing
 
 ### Unit tests
