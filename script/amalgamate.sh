@@ -8,7 +8,8 @@ set -euxo pipefail
 # This is not how BearSSL was designed in mind, so this is not
 # going to be pretty. My apologies!
 
-curl -LO https://bearssl.org/bearssl-0.6.tar.gz
+# insecure is OK since we are checking the tar.gz integrity after downloading
+curl -LO --insecure https://bearssl.org/bearssl-0.6.tar.gz
 sha256sum -c checksum
 tar -xzvf bearssl-0.6.tar.gz
 
@@ -113,6 +114,49 @@ sed -e 's/#include \"inner.h\"//g' src/int/i31_sub.c >> $OUTFILE
 sed -e 's/#include \"inner.h\"//g' src/int/i31_tmont.c >> $OUTFILE
 sed -e 's/#include \"inner.h\"//g' src/int/i32_div32.c >> $OUTFILE
 sed -e 's/#include \"inner.h\"//g' src/hash/sha2small.c >> $OUTFILE
+
+
+staticize () {
+        # first line does this kind of conversion
+        # void
+        # br_ccopy(
+        # ->
+        # static void
+        # br_ccopy(
+        #
+        # second line is more straightforward: void br_ccopy( -> static void br_ccopy(
+        perl -0pi -e "s/$1\n$2\(/static $1\n$2\(/g" $OUTFILE
+        perl -0pi -e "s/$1 $2\(/static $1 $2\(/g" $OUTFILE
+}
+
+staticize void br_ccopy
+staticize uint32_t br_divrem
+staticize void br_ecdsa_i31_bits2int
+staticize uint32_t br_ecdsa_i31_vrfy_raw
+staticize uint32_t br_i31_add
+staticize uint32_t br_i31_bit_length
+staticize void br_i31_decode
+staticize uint32_t br_i31_decode_mod
+staticize void br_i31_encode
+staticize void br_i31_from_monty
+staticize uint32_t br_i31_iszero
+staticize void br_i31_modpow
+staticize void br_i31_montymul
+staticize void br_i31_muladd_small
+staticize uint32_t br_i31_ninv31
+staticize void br_i31_rshift
+staticize uint32_t br_i31_sub
+staticize void br_i31_to_monty
+staticize void br_range_dec32be
+staticize void br_range_enc32be
+staticize void br_sha224_init
+staticize void br_sha224_out
+staticize void br_sha224_set_state
+staticize uint64_t br_sha224_state
+staticize void br_sha224_update
+staticize void br_sha256_init
+staticize void br_sha256_out
+staticize void br_sha2small_round
 
 cat <<EOF >> $OUTFILE
 
