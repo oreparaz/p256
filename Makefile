@@ -29,7 +29,12 @@ CFLAGS = --std=c99
 CXXFLAGS = --std=c++17
 
 $(BUILD_DIR)/p256_unittests: $(OBJS) Makefile
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/p256_doctests: Makefile $(BUILD_DIR)/p256.c.o
+	# uncomment to regenerate test vectors
+	#+$(MAKE) -C tests/golang/
+	$(CXX) $(CXXFLAGS) $(BUILD_DIR)/p256.c.o tests/golang/test_golang.cc -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.c.o: %.c Makefile
 	mkdir -p $(dir $@) && $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
@@ -37,8 +42,8 @@ $(BUILD_DIR)/%.c.o: %.c Makefile
 $(BUILD_DIR)/%.cc.o: %.cc Makefile
 	mkdir -p $(dir $@) && $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/p256_unittests.timestamp: $(BUILD_DIR)/p256_unittests
-	$(BUILD_DIR)/p256_unittests && touch $(BUILD_DIR)/p256_unittests.timestamp
+$(BUILD_DIR)/p256_unittests.timestamp: $(BUILD_DIR)/p256_unittests $(BUILD_DIR)/p256_doctests
+	$(BUILD_DIR)/p256_unittests && $(BUILD_DIR)/p256_doctests && touch $(BUILD_DIR)/p256_unittests.timestamp
 
 .PHONY: clean
 
