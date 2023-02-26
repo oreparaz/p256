@@ -78,23 +78,9 @@ sed -e 's/#include \"config.h\"//g'         \
 
 sed -e 's/#include \"inner.h\"//g' src/codec/ccopy.c >> $OUTFILE
 sed -e 's/#include \"inner.h\"//g' src/codec/dec32be.c >> $OUTFILE
-sed -e 's/#include \"inner.h\"//g' src/ec/ec_prime_i31.c >> $OUTFILE
 
-# We're collapsing several translation units, so we need to undef
-# the following definitions that would interfere with future files.
-# Yikes!
+sed -e 's/#include \"inner.h\"//g' src/ec/ec_p256_m31.c >> $OUTFILE
 
-echo "#undef t1" >> $OUTFILE
-echo "#undef t2" >> $OUTFILE
-echo "#undef t3" >> $OUTFILE
-echo "#undef t4" >> $OUTFILE
-echo "#undef t5" >> $OUTFILE
-echo "#undef t6" >> $OUTFILE
-echo "#undef t7" >> $OUTFILE
-
-sed -e 's/#include \"inner.h\"//g' src/ec/ec_secp256r1.c >> $OUTFILE
-sed -e 's/#include \"inner.h\"//g' src/ec/ec_secp384r1.c >> $OUTFILE
-sed -e 's/#include \"inner.h\"//g' src/ec/ec_secp521r1.c >> $OUTFILE
 sed -e 's/#include \"inner.h\"//g' src/ec/ecdsa_i31_bits.c >> $OUTFILE
 sed -e 's/#include \"inner.h\"//g' src/ec/ecdsa_i31_vrfy_raw.c >> $OUTFILE
 sed -e 's/#include \"inner.h\"//g' src/codec/enc32be.c >> $OUTFILE
@@ -162,6 +148,12 @@ cat <<EOF >> $OUTFILE
 
 #include "p256.h"
 
+const br_ec_curve_def br_secp256r1 = {
+	BR_EC_secp256r1,
+	P256_N, sizeof P256_N,
+	P256_G, sizeof P256_G
+};
+
 p256_ret_t p256_verify(uint8_t *msg, size_t msg_len, uint8_t *sig, const uint8_t *pk)
 {
     unsigned char hash[64];
@@ -182,7 +174,7 @@ p256_ret_t p256_verify(uint8_t *msg, size_t msg_len, uint8_t *sig, const uint8_t
         .qlen = 65, // uncompressed, account for extra 0x04
     };
 
-    if (vrfy(&br_ec_prime_i31, hash, hash_len,
+    if (vrfy(&br_ec_p256_m31, hash, hash_len,
         &pub, sig, sig_len) != 1)
     {
         return P256_INVALID_SIGNATURE;
