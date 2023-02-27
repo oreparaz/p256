@@ -15,12 +15,15 @@ p256_ret_t ec_p256_verify(uint8_t *msg, size_t msg_len, uint8_t *sig, const uint
 where
  * `msg` is a pointer to the `msg_len`-bytes long message being authenticated
  * `sig` is a 64-byte buffer containing the raw `(r,s)` signature
- * `pk` is a 65-byte buffer containing the public key in uncompressed format
- (constructed as follows: take the byte constant 04, followed by the 256-bit `x` coordinate,
- followed by the 256-bit `y` coordinate).
- Compressed public keys are not supported.
+ * `pk` is a buffer containing the public key in either uncompressed format
+    (must be a 65-byte buffer starting with 04) or compressed (must be at least
+    33-byte buffer starting with 02 or 03).
 
 The function returns `P256_SUCCESS` iff signature is valid.
+Uncompressed keys are made of the constant 04, followed by the 256-bit `x` coordinate,
+followed by the 256-bit `y` coordinate. Compressed keys are made of the
+constant 02 or 03 (depending on the sign of the y coordinate) followed by
+256-bit `x` coordinate.
 
 ## Example usage
 
