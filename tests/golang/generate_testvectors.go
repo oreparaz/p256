@@ -41,7 +41,7 @@ func randomMessage(len int) []byte {
 	return randomBadMsg
 }
 
-func generateTestData(explanation string) TestData {
+func generateTestData(explanation string, isCompressedPublicKey bool) TestData {
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		panic(err)
@@ -62,7 +62,12 @@ func generateTestData(explanation string) TestData {
 
 	pk := privateKey.PublicKey
 
-	publicKeyBytes := elliptic.Marshal(pk.Curve, pk.X, pk.Y)
+	var publicKeyBytes []byte
+	if isCompressedPublicKey {
+		publicKeyBytes = elliptic.MarshalCompressed(pk.Curve, pk.X, pk.Y)
+	} else {
+		publicKeyBytes = elliptic.Marshal(pk.Curve, pk.X, pk.Y)
+	}
 
 	return TestData{
 		Explanation: explanation,
@@ -73,8 +78,8 @@ func generateTestData(explanation string) TestData {
 	}
 }
 
-func generateInvalidTestData(explanation string) TestData {
-	testData := generateTestData(explanation)
+func generateInvalidTestData(explanation string, isCompressedPublicKey bool) TestData {
+	testData := generateTestData(explanation, isCompressedPublicKey)
 	testData.Message = ToCArray(randomMessage(4))
 	testData.Valid = false
 	return testData
@@ -99,7 +104,9 @@ TEST_CASE(" {{.Explanation}} ") {
 
 func main() {
 	for i := 0; i < 1000; i++ {
-		print(generateTestData(fmt.Sprintf("test golang valid %d", i)))
-		print(generateInvalidTestData(fmt.Sprintf("test golang invalid %d", i)))
+		print(generateTestData(fmt.Sprintf("test golang valid uncompressed %d", i), false))
+		print(generateInvalidTestData(fmt.Sprintf("test golang invalid uncompressed %d", i), false))
+		print(generateTestData(fmt.Sprintf("test golang valid compressed %d", i), true))
+		print(generateInvalidTestData(fmt.Sprintf("test golang invalid compressed %d", i), true))
 	}
 }

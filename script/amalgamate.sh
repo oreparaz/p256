@@ -13,6 +13,10 @@ curl -LO --insecure https://bearssl.org/bearssl-0.6.tar.gz
 sha256sum -c checksum
 tar -xzvf bearssl-0.6.tar.gz
 
+pushd bearssl-0.6
+patch -p1 < ../0001-feat-add-NIST-P-256-point-decompression.patch
+popd
+
 OUTFILE=`pwd`/../p256.c
 
 rm -f $OUTFILE
@@ -168,10 +172,22 @@ p256_ret_t p256_verify(uint8_t *msg, size_t msg_len, uint8_t *sig, const uint8_t
  
     size_t sig_len = 64; // P-256
 
+    // TODO: p256_verify should take a pk_len argument so that we can verify
+    // here the following precondition:
+    // pk must be at least 65 bytes long, or 33 if the first byte is 0x02 or 0x03.
+
+    unsigned char public_key[65];
+    if ((pk[0] != 0x04) && (pk[0] != 0x02) && (pk[0] != 0x03)) {
+        return P256_INVALID_SIGNATURE; // TODO: more specific errors
+    }
+
+    size_t pk_len = (pk[0]==0x04) ? 65 : 33;
+    memcpy(public_key, pk, pk_len);
+
     const br_ec_public_key pub = {
         .curve = BR_EC_secp256r1,
-        .q =  (unsigned char *)pk,
-        .qlen = 65, // uncompressed, account for extra 0x04
+        .q =  public_key,
+        .qlen = pk_len,
     };
 
     if (vrfy(&br_ec_p256_m31, hash, hash_len,
