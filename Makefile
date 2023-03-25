@@ -45,11 +45,16 @@ $(BUILD_DIR)/%.cc.o: %.cc Makefile
 $(BUILD_DIR)/p256_unittests.timestamp: $(BUILD_DIR)/p256_unittests $(BUILD_DIR)/p256_doctests
 	$(BUILD_DIR)/p256_unittests && $(BUILD_DIR)/p256_doctests && touch $(BUILD_DIR)/p256_unittests.timestamp
 
+$(BUILD_DIR)/p256_stack: Makefile $(BUILD_DIR)/p256.c.o $(BUILD_DIR)/tests/stack_utils.c.o $(BUILD_DIR)/tests/system_info.c.o
+	$(CC) $(BUILD_DIR)/p256.c.o $(BUILD_DIR)/tests/stack_utils.c.o $(BUILD_DIR)/tests/system_info.c.o tests/test_stack.c -o $@
+
 .PHONY: clean
 
 clean:
 	$(RM) -r $(BUILD_DIR)
 
 .DEFAULT_GOAL := $(BUILD_DIR)/p256_unittests.timestamp
+
+all: $(BUILD_DIR)/p256_unittests.timestamp
 
 -include $(DEPS)
