@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "stack_utils.h"
+#include "stack_count.h"
 #include "system_info.h"
 #include <string.h>
 #include "../p256.h"
@@ -40,9 +40,9 @@ int do_one_verify(void)
 
 int main(int argc, char **argv) {
     system_info();
-    stack_fill(8192);
+    void *p = stack_count_clear();
     int ret = do_one_verify();
-    size_t stack_used = stack_find_marker(8192);
+    size_t stack_used = stack_count_usage(p);
     printf("stack used: %ld bytes\n", stack_used);
     int reasonable_stack = (stack_used > 2500) && (stack_used < 4500);
     if (ret != P256_SUCCESS) {
